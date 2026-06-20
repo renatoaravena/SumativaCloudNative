@@ -26,12 +26,12 @@ jobs:
       # Paso 3: Construir la imagen de Docker
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/CloudNativeApp:latest .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest .
 
       # Paso 4: Hacer push de la imagen a DockerHub
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/CloudNativeApp:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
           
      # Paso 5: Configurar credenciales de AWS para SSH, incluyendo AWS_SESSION_TOKEN
       - name: Set up AWS credentials
@@ -56,9 +56,9 @@ jobs:
             # Autenticar en DockerHub desde EC2
             echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             # Descargar la última versión de la imagen
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/CloudNativeApp:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
             # Parar y eliminar cualquier contenedor previo
-            docker stop CloudNativeApp || true && docker rm CloudNativeApp || true
+            docker stop cloud-native-app || true && docker rm cloud-native-app || true
             # Iniciar el contenedor
-            docker run -d --name CloudNativeApp -v /home/ec2-user/efs:/app/efs -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/CloudNativeApp:latest
+            docker run -d --name cloud-native-app -v /home/ec2-user/efs:/app/efs -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
           EOF
