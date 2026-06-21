@@ -60,5 +60,12 @@ jobs:
             # Parar y eliminar cualquier contenedor previo
             docker stop cloud-native-app || true && docker rm cloud-native-app || true
             # Iniciar el contenedor
-            docker run -d --name cloud-native-app -v /home/ec2-user/efs:/app/efs -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
+            docker run -d \
+              --name cloud-native-app \
+              -v /home/ec2-user/efs:/app/efs \
+              -p 8080:8080 \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+              -e AWS_REGION="${{ secrets.AWS_REGION }}" \
+              ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
           EOF
