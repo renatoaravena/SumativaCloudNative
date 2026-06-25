@@ -14,4 +14,10 @@ public class GuiaDespacho {
     private String producto;
 
     private Integer cantidad;
+
+    private String transportista;
+
+    private String fecha;
+
+    private String pdf;
 }

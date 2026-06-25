@@ -12,4 +12,8 @@ public class GuiaRequest {
     private String producto;
 
     private Integer cantidad;
+
+    private String transportista;
+
+    private String fecha;
 }
