@@ -15,16 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.duoc.SumativaCloudNative.service.EfsService;
 
 import com.duoc.SumativaCloudNative.dto.S3ObjectDto;
 import com.duoc.SumativaCloudNative.service.AwsS3Service;
-import com.duoc.SumativaCloudNative.service.EfsService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/s3")
 @RequiredArgsConstructor
 public class AwsS3Controller {
+
+	@Autowired
+	private EfsService efsService;
 
 	@Autowired
 	private AwsS3Service awsS3Service;
@@ -73,6 +76,7 @@ public class AwsS3Controller {
 		try {
 
 			awsS3Service.upload(bucket, key, file);
+			efsService.saveToEfs(key,file); // Guardar el archivo en EFS
 
 			return ResponseEntity.status(HttpStatus.CREATED).build();
 		} catch (Exception e) {
