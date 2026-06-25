@@ -1,22 +1,15 @@
 package com.duoc.SumativaCloudNative.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class GuiaResponse {
 
-    private Long id;
-
-    private String numeroGuia;
-
-    private String mensaje;
+    private String numero;
 
     private String archivo;
 
-    private String bucket;
-
-    private String estado;
+    private String mensaje;
 }

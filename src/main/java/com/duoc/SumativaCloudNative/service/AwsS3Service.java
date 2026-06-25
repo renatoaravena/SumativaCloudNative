@@ -1,5 +1,6 @@
 package com.duoc.SumativaCloudNative.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -218,6 +219,24 @@ public class AwsS3Service {
 				throw new S3AccessDeniedException("eliminar objeto del bucket: " + bucket, e);
 			}
 			throw new S3OperationException("Error al eliminar el objeto: " + key, e);
+		}
+	}
+
+	public void uploadFile(String bucket,String key,File file) {
+		try {
+
+			PutObjectRequest request =
+					PutObjectRequest.builder()
+							.bucket(bucket)
+							.key(key)
+							.contentType("application/pdf")
+							.build();
+
+			s3Client.putObject(request,file.toPath());
+
+		} catch (Exception e) {
+
+			throw new RuntimeException("Error subiendo PDF a S3", e);
 		}
 	}
 }

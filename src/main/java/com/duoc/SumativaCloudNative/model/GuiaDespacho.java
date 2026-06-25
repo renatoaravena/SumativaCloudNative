@@ -1,30 +1,17 @@
 package com.duoc.SumativaCloudNative.model;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class GuiaDespacho {
 
-    private Long id;
-
-    private String numeroGuia;
+    private String numero;
 
     private String cliente;
 
-    private String transportista;
+    private String direccion;
 
-    private String origen;
+    private String producto;
 
-    private String destino;
-
-    private String fecha;
-
-    private String estado;
-
-    private String rutaPdf;
-
-    private String rutaS3;
+    private Integer cantidad;
 }

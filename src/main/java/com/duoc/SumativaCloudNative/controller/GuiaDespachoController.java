@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.duoc.SumativaCloudNative.dto.GuiaRequest;
 import com.duoc.SumativaCloudNative.dto.GuiaResponse;
-import com.duoc.SumativaCloudNative.model.GuiaDespacho;
 import com.duoc.SumativaCloudNative.service.GuiaDespachoService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,19 +17,11 @@ public class GuiaDespachoController {
     private final GuiaDespachoService guiaService;
 
     @PostMapping
-    public ResponseEntity<GuiaResponse> crearGuia(
-            @RequestBody GuiaRequest request) {
-
-        GuiaDespacho guia =
-                guiaService.crearGuia(request);
+    public ResponseEntity<GuiaResponse> crear(
+            @RequestBody GuiaRequest request)
+            throws Exception {
 
         return ResponseEntity.ok(
-                GuiaResponse.builder()
-                        .id(guia.getId())
-                        .numeroGuia(guia.getNumeroGuia())
-                        .estado(guia.getEstado())
-                        .mensaje("Guía creada correctamente")
-                        .build()
-        );
+                guiaService.crearGuia(request));
     }
 }

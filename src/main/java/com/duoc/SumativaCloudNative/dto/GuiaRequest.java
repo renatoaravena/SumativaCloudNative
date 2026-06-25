@@ -7,9 +7,9 @@ public class GuiaRequest {
 
     private String cliente;
 
-    private String transportista;
+    private String direccion;
 
-    private String origen;
+    private String producto;
 
-    private String destino;
+    private Integer cantidad;
 }
