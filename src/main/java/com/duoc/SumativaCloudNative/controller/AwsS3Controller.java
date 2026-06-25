@@ -29,9 +29,6 @@ public class AwsS3Controller {
 	@Autowired
 	private AwsS3Service awsS3Service;
 
-	@Autowired
-	private EfsService efsService;
-
 	/**
 	 * Lista todos los objetos en un bucket de S3
 	 * 
@@ -62,7 +59,7 @@ public class AwsS3Controller {
 	}
 
 	/**
-	 * Sube un archivo a S3 y lo almacena en EFS
+	 * Sube un archivo a S3
 	 * 
 	 * @param bucket Nombre del bucket
 	 * @param key    Clave del objeto
@@ -74,8 +71,6 @@ public class AwsS3Controller {
 			@RequestParam("file") MultipartFile file) {
 
 		try {
-
-			efsService.saveToEfs(key, file);
 
 			awsS3Service.upload(bucket, key, file);
 
