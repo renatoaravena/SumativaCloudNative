@@ -1,4 +1,3 @@
-// src/main/java/com/duoc/SumativaCloudNative/controller/GuiaController.java
 package com.duoc.SumativaCloudNative.controller;
 
 import com.duoc.SumativaCloudNative.dto.GuiaRequest;
@@ -6,28 +5,34 @@ import com.duoc.SumativaCloudNative.model.GuiaDespacho;
 import com.duoc.SumativaCloudNative.service.AwsS3Service;
 import com.duoc.SumativaCloudNative.service.GuiaService;
 import com.itextpdf.text.DocumentException;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/guias")
-@RequiredArgsConstructor
 public class GuiaController {
 
     private final GuiaService guiaService;
     private final AwsS3Service awsS3Service;
+    private final String bucket;
 
-    @Value("${aws.s3.bucket}")
-    private String bucket;
+    public GuiaController(
+            GuiaService guiaService,
+            AwsS3Service awsS3Service,
+            @Value("${aws.s3.bucket}") String bucket) {
+        this.guiaService = guiaService;
+        this.awsS3Service = awsS3Service;
+        this.bucket = bucket;
+    }
 
-    /** POST /guias — Crear guía y subir automáticamente a S3 vía EFS */
+    /** POST /guias — Crear guía, guardar en EFS y subir a S3 */
     @PostMapping
     public ResponseEntity<GuiaDespacho> crearGuia(@RequestBody GuiaRequest request)
             throws IOException, DocumentException {
@@ -48,7 +53,7 @@ public class GuiaController {
                 .body(bytes);
     }
 
-    /** PUT /guias?s3KeyOriginal=... — Modificar/actualizar guía existente */
+    /** PUT /guias?s3KeyOriginal=... — Modificar guía existente */
     @PutMapping
     public ResponseEntity<GuiaDespacho> actualizarGuia(
             @RequestParam String s3KeyOriginal,
@@ -58,27 +63,24 @@ public class GuiaController {
         return ResponseEntity.ok(guia);
     }
 
-    /** DELETE /guias?s3Key=... — Eliminar guía específica */
+    /** DELETE /guias?s3Key=... — Eliminar guía */
     @DeleteMapping
     public ResponseEntity<Void> eliminarGuia(@RequestParam String s3Key) {
         guiaService.eliminarGuia(s3Key);
         return ResponseEntity.noContent().build();
     }
 
-    /** GET /guias/{transportista}?fecha=20240101 — Consultar por transportista y fecha */
+    /** GET /guias/{transportista}?fecha=20240627 — Consultar por transportista y fecha */
     @GetMapping("/{transportista}")
     public ResponseEntity<List<String>> listarGuias(
             @PathVariable String transportista,
             @RequestParam(required = false) String fecha) {
-
         String prefix = (fecha != null ? fecha + "/" : "") + transportista + "/";
-
         List<String> keys = awsS3Service.listObjects(bucket)
                 .stream()
                 .map(dto -> dto.getKey())
                 .filter(key -> key.startsWith(prefix))
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(keys);
     }
 }
