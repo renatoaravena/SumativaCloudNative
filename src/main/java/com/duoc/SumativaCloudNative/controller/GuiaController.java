@@ -70,16 +70,16 @@ public class GuiaController {
         return ResponseEntity.noContent().build();
     }
 
-    /** GET /guias/{transportista}?fecha=20240627 — Consultar por transportista y fecha */
     @GetMapping("/{transportista}")
     public ResponseEntity<List<String>> listarGuias(
             @PathVariable String transportista,
             @RequestParam(required = false) String fecha) {
-        String prefix = (fecha != null ? fecha + "/" : "") + transportista + "/";
         List<String> keys = awsS3Service.listObjects(bucket)
                 .stream()
                 .map(dto -> dto.getKey())
-                .filter(key -> key.startsWith(prefix))
+                .filter(key -> fecha != null 
+                    ? key.startsWith(fecha + "/" + transportista + "/")
+                    : key.contains("/" + transportista + "/"))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(keys);
     }
