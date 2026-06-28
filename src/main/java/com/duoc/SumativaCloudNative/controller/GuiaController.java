@@ -40,12 +40,10 @@ public class GuiaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(guia);
     }
 
-    /** GET /guias/download?s3Key=...&transportista=... — Descargar con validación */
+    /** GET /guias/download?s3Key=... — Descargar guía por ruta completa */
     @GetMapping("/download")
-    public ResponseEntity<byte[]> descargarGuia(
-            @RequestParam String s3Key,
-            @RequestParam String transportista) {
-        byte[] bytes = guiaService.descargarGuia(s3Key, transportista);
+    public ResponseEntity<byte[]> descargarGuia(@RequestParam String s3Key) {
+        byte[] bytes = awsS3Service.downloadAsBytes(bucket, s3Key);
         String filename = s3Key.substring(s3Key.lastIndexOf("/") + 1);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
@@ -53,7 +51,7 @@ public class GuiaController {
                 .body(bytes);
     }
 
-    /** PUT /guias?s3KeyOriginal=... — Modificar guía existente */
+    /** PUT /guias — Modificar guía existente */
     @PutMapping
     public ResponseEntity<GuiaDespacho> actualizarGuia(
             @RequestParam String s3KeyOriginal,
@@ -63,7 +61,7 @@ public class GuiaController {
         return ResponseEntity.ok(guia);
     }
 
-    /** DELETE /guias?s3Key=... — Eliminar guía */
+    /** DELETE /guias — Eliminar guía por ruta completa */
     @DeleteMapping
     public ResponseEntity<Void> eliminarGuia(@RequestParam String s3Key) {
         guiaService.eliminarGuia(s3Key);
