@@ -68,6 +68,8 @@ public class GuiaController {
         return ResponseEntity.noContent().build();
     }
 
+
+    /** GET /guias/{transportista}?fecha=... — Listar guías por transportista y fecha */
     @GetMapping("/{transportista}")
     public ResponseEntity<List<String>> listarGuias(
             @PathVariable String transportista,
