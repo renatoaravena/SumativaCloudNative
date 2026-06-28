@@ -83,4 +83,14 @@ public class GuiaController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(keys);
     }
+
+    /** GET /guias — Listar todas las guías del bucket */
+    @GetMapping
+    public ResponseEntity<List<String>> listarTodasLasGuias() {
+        List<String> keys = awsS3Service.listObjects(bucket)
+                .stream()
+                .map(dto -> dto.getKey())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(keys);
+    }
 }
