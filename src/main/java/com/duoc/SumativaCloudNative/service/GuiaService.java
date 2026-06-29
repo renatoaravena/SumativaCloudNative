@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -37,8 +38,8 @@ public class GuiaService {
 
     public GuiaDespacho crearGuia(GuiaRequest request) throws IOException, DocumentException {
         String id = UUID.randomUUID().toString().substring(0, 8);
-        LocalDate hoy = LocalDate.now();
-        String fecha = hoy.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/Santiago"));
+        String fecha = hoy.format(DateTimeFormatter.ofPattern("ddMMyyyy"));
         String nombreArchivo = "guia_" + id + ".pdf";
 
         // 1. Guardar PDF temporalmente en EFS
