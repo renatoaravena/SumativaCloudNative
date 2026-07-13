@@ -2,95 +2,70 @@ package com.duoc.SumativaCloudNative.controller;
 
 import com.duoc.SumativaCloudNative.dto.GuiaRequest;
 import com.duoc.SumativaCloudNative.model.GuiaDespacho;
-import com.duoc.SumativaCloudNative.service.AwsS3Service;
 import com.duoc.SumativaCloudNative.service.GuiaService;
 import com.itextpdf.text.DocumentException;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j
 @RestController
-@RequestMapping("/guias")
+@RequestMapping("/api/guias")
+@RequiredArgsConstructor
 public class GuiaController {
 
     private final GuiaService guiaService;
-    private final AwsS3Service awsS3Service;
-    private final String bucket;
 
-    public GuiaController(
-            GuiaService guiaService,
-            AwsS3Service awsS3Service,
-            @Value("${aws.s3.bucket}") String bucket) {
-        this.guiaService = guiaService;
-        this.awsS3Service = awsS3Service;
-        this.bucket = bucket;
-    }
-
-    /** POST /guias — Crear guía, guardar en EFS y subir a S3 */
+    /**
+     * Publica la guía en RabbitMQ.
+     * El consumidor será el encargado de crearla.
+     */
     @PostMapping
-    public ResponseEntity<GuiaDespacho> crearGuia(@RequestBody GuiaRequest request)
-            throws IOException, DocumentException {
-        GuiaDespacho guia = guiaService.crearGuia(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(guia);
+    public ResponseEntity<String> crearGuia(@RequestBody GuiaRequest request) {
+
+        guiaService.publicarGuia(request);
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body("Solicitud enviada a la cola. La guía será procesada por el consumidor.");
     }
 
-    /** GET /guias/download?s3Key=... — Descargar guía por ruta completa */
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> descargarGuia(@RequestParam String s3Key) {
-        byte[] bytes = awsS3Service.downloadAsBytes(bucket, s3Key);
-        String filename = s3Key.substring(s3Key.lastIndexOf("/") + 1);
+    @GetMapping(value = "/descargar", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> descargarGuia(
+            @RequestParam String s3Key,
+            Authentication authentication) {
+
+        byte[] pdf = guiaService.descargarGuia(
+                s3Key,
+                authentication.getName()
+        );
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(bytes);
+                .body(pdf);
     }
 
-    /** PUT /guias — Modificar guía existente */
     @PutMapping
-    public ResponseEntity<GuiaDespacho> actualizarGuia(
-            @RequestParam String s3KeyOriginal,
-            @RequestBody GuiaRequest request)
-            throws IOException, DocumentException {
-        GuiaDespacho guia = guiaService.actualizarGuia(s3KeyOriginal, request);
-        return ResponseEntity.ok(guia);
+    public ResponseEntity<String> actualizarGuia(
+            @RequestParam String s3Key,
+            @RequestBody GuiaRequest request) {
+
+        guiaService.actualizarGuia(s3Key, request);
+
+        return ResponseEntity.accepted()
+                .body("Solicitud de actualización enviada a la cola.");
     }
 
-    /** DELETE /guias — Eliminar guía por ruta completa */
     @DeleteMapping
-    public ResponseEntity<Void> eliminarGuia(@RequestParam String s3Key) {
+    public ResponseEntity<String> eliminarGuia(
+            @RequestParam String s3Key) {
+
         guiaService.eliminarGuia(s3Key);
-        return ResponseEntity.noContent().build();
-    }
 
-
-    /** GET /guias/{transportista}?fecha=... — Listar guías por transportista y fecha */
-    @GetMapping("/{transportista}")
-    public ResponseEntity<List<String>> listarGuias(
-            @PathVariable String transportista,
-            @RequestParam(required = false) String fecha) {
-        List<String> keys = awsS3Service.listObjects(bucket)
-                .stream()
-                .map(dto -> dto.getKey())
-                .filter(key -> fecha != null 
-                    ? key.startsWith(fecha + "/" + transportista + "/")
-                    : key.contains("/" + transportista + "/"))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(keys);
-    }
-
-    /** GET /guias — Listar todas las guías del bucket */
-    @GetMapping
-    public ResponseEntity<List<String>> listarTodasLasGuias() {
-        List<String> keys = awsS3Service.listObjects(bucket)
-                .stream()
-                .map(dto -> dto.getKey())
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(keys);
+        return ResponseEntity.ok("Guía eliminada correctamente");
     }
 }
