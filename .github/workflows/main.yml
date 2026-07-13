@@ -66,6 +66,7 @@ jobs:
             # Iniciar el contenedor
             docker run -d \
               --name cloud-native-app \
+              --network app-network \
               -v /home/ec2-user/efs:/app/efs \
               -p 8080:8080 \
               -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
