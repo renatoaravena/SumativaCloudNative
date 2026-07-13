@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/guias")
+@RequestMapping("/guias")
 @RequiredArgsConstructor
 public class GuiaController {
 
