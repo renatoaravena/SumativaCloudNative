@@ -59,6 +59,10 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
             # Parar y eliminar cualquier contenedor previo
             docker stop cloud-native-app || true && docker rm cloud-native-app || true
+            # Asegurar que la red exista
+            docker network create app-network || true
+            # Conectar rabbitmq1 a la red (por si no está)
+            docker network connect app-network rabbitmq1 || true
             # Iniciar el contenedor
             docker run -d \
               --name cloud-native-app \
