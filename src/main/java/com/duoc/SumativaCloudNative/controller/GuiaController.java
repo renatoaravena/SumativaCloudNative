@@ -2,16 +2,21 @@ package com.duoc.SumativaCloudNative.controller;
 
 import com.duoc.SumativaCloudNative.dto.GuiaRequest;
 import com.duoc.SumativaCloudNative.model.GuiaDespacho;
+import com.duoc.SumativaCloudNative.model.GuiaProcesada;
 import com.duoc.SumativaCloudNative.service.GuiaService;
 import com.itextpdf.text.DocumentException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/guias")
@@ -67,5 +72,14 @@ public class GuiaController {
         guiaService.eliminarGuia(s3Key);
 
         return ResponseEntity.ok("Guía eliminada correctamente");
+    }
+
+    @GetMapping("/guias/consultar")
+        public ResponseEntity<List<GuiaProcesada>> consultarGuias(
+                @RequestParam String transportista,
+                @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+
+            List<GuiaProcesada> resultado = guiaService.consultarPorTransportistaYFecha(transportista, fecha);
+            return ResponseEntity.ok(resultado);
     }
 }
