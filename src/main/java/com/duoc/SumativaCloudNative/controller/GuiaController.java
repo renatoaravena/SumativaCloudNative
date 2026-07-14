@@ -74,7 +74,7 @@ public class GuiaController {
         return ResponseEntity.ok("Guía eliminada correctamente");
     }
 
-    @GetMapping("/guias/consultar")
+    @GetMapping
         public ResponseEntity<List<GuiaProcesada>> consultarGuias(
                 @RequestParam String transportista,
                 @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
