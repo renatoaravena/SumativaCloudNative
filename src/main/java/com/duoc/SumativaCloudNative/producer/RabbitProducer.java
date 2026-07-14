@@ -17,15 +17,31 @@ public class RabbitProducer {
     private final RabbitTemplate rabbitTemplate;
 
     public void enviarGuia(GuiaMessage guiaMessage) {
+        log.info("Evaluando guía antes de enviar a RabbitMQ: {}", guiaMessage);
 
-        log.info("Enviando guía a RabbitMQ: {}", guiaMessage);
+        // Convertimos el objeto a un String en minúsculas para atrapar la palabra en cualquier campo
+        String contenidoMensaje = String.valueOf(guiaMessage).toLowerCase();
 
-        rabbitTemplate.convertAndSend(
+        if (contenidoMensaje.contains("error")) {
+            log.warn("Palabra 'error' detectada. Desviando mensaje directamente a la DLQ...");
+            
+            rabbitTemplate.convertAndSend(
+                RabbitConstants.GUIA_DLX, 
+                RabbitConstants.GUIA_DLX_ROUTING_KEY, 
+                guiaMessage
+            );
+            
+            log.info("Mensaje enviado exitosamente a la cola de errores (DLQ).");
+        } else {
+            log.info("Flujo normal. Enviando guía a la cola principal...");
+            
+            rabbitTemplate.convertAndSend(
                 RabbitConstants.GUIA_EXCHANGE,
                 RabbitConstants.GUIA_ROUTING_KEY,
-                guiaMessage);
-
-        log.info("Mensaje enviado correctamente.");
+                guiaMessage
+            );
+            
+            log.info("Mensaje enviado correctamente a la cola principal.");
+        }
     }
-
 }
