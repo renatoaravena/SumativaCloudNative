@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.duoc.SumativaCloudNative.constants.RabbitConstants;
+//Cofiguracion de rabbitmq
 
 @Configuration
 public class RabbitMQConfig {
